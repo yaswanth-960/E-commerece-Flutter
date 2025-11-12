@@ -1,0 +1,291 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(ShopEaseApp());
+
+class ShopEaseApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ShopEase India',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        scaffoldBackgroundColor: Colors.indigo.shade50,
+        fontFamily: 'Roboto',
+      ),
+      home: ProductListPage(),
+    );
+  }
+}
+
+class Product {
+  final String name;
+  final double price;
+  final String emoji;
+  final String description;
+
+  Product(this.name, this.price, this.emoji, this.description);
+}
+
+final List<Product> products = [
+  Product('Smart Watch', 3499, '⌚', 'Track fitness and health in style.'),
+  Product('Wireless Headphones', 2599, '🎧', 'Crystal clear sound quality.'),
+  Product('Sneakers', 1999, '👟', 'Lightweight and stylish running shoes.'),
+  Product('Backpack', 1299, '🎒', 'Durable bag for college or travel.'),
+  Product('DSLR Camera', 24999, '📷', 'Capture high-quality professional shots.'),
+  Product('Laptop', 52999, '💻', 'Powerful and lightweight for work & play.'),
+  Product('Smartphone', 18999, '📱', 'Smooth performance with great camera.'),
+  Product('Bluetooth Speaker', 1599, '🔊', 'Compact and loud with deep bass.'),
+];
+
+class ProductListPage extends StatefulWidget {
+  @override
+  _ProductListPageState createState() => _ProductListPageState();
+}
+
+class _ProductListPageState extends State<ProductListPage> {
+  int cartCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final crossCount = width > 1000
+        ? 4
+        : width > 700
+            ? 3
+            : 2;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('🛒 ShopEase India'),
+        centerTitle: true,
+        elevation: 8,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.indigo, Colors.purple.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        actions: [
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart_outlined, size: 28),
+                onPressed: () {},
+              ),
+              if (cartCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$cartCount',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.indigo.shade100, Colors.purple.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossCount,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailPage(
+                        product: product,
+                        onAddToCart: () {
+                          setState(() => cartCount++);
+                        },
+                      ),
+                    ),
+                  );
+                },
+                child: ProductCard(product: product),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ProductCard extends StatelessWidget {
+  final Product product;
+  const ProductCard({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [Colors.purple.shade200, Colors.indigo.shade300],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: Offset(2, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(product.emoji, style: const TextStyle(fontSize: 60)),
+          const SizedBox(height: 10),
+          Text(
+            product.name,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '₹${product.price.toStringAsFixed(0)}',
+            style: const TextStyle(fontSize: 15, color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProductDetailPage extends StatelessWidget {
+  final Product product;
+  final VoidCallback onAddToCart;
+
+  const ProductDetailPage({required this.product, required this.onAddToCart});
+
+  @override
+  Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 600;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(product.name),
+        centerTitle: true,
+        elevation: 6,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.indigo, Colors.purple],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Container(
+            constraints: BoxConstraints(maxWidth: isWide ? 500 : double.infinity),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black26, blurRadius: 10, offset: Offset(2, 4))
+              ],
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(product.emoji, style: const TextStyle(fontSize: 100)),
+                const SizedBox(height: 16),
+                Text(
+                  product.name,
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  product.description,
+                  style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '₹${product.price.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                      fontSize: 22,
+                      color: Colors.indigo,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    elevation: 5,
+                  ),
+                  icon: const Icon(Icons.shopping_cart),
+                  label: const Text(
+                    'Add to Cart',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    onAddToCart();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('${product.name} added to cart!'),
+                      duration: const Duration(seconds: 1),
+                    ));
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
